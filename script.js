@@ -42,12 +42,23 @@ function gerarNumeroTransacao(){
   return Math.floor(Math.random() * 10000000);
 }
 
-function registrarHistorico(mensagem){
+function registrarHistorico(mensagem, ehSucesso=true){
   //RN.06 - Histórico de Alterações
-  const historicoVendas = document.getElementById("historicoVendas");
-  const li = document.createElement("li");
-  li.textContent = mensagem;
-  historicoVendas.appendChild(li);
+  
+  const divAlerta = document.getElementById("divAlerta");
+  divAlerta.style.display="none";
+  divAlerta.innerHTML = ""; 
+
+  if(ehSucesso){
+    const historicoVendas = document.getElementById("historicoVendas");
+    const li = document.createElement("li");
+    li.textContent = mensagem;
+    historicoVendas.appendChild(li);
+  } else {
+    divAlerta.className = "alert alert-warning";
+    divAlerta.style.display="block";
+    divAlerta.innerHTML = "<strong>Atenção!</strong> " + mensagem; 
+  }
 }
 
 function atualizarEstoque(produto, quantidade){
@@ -82,18 +93,33 @@ function registrarVenda(produto, quantidade, preco){
           
           atualizarEstoque(produto, quantidade);
 
-          return "["+numeroTransacao+"] Venda registrada com sucesso: " + produto + ", " + quantidade + " unidades, R$" + preco + " por unidade, em " + data;
+          return {
+            mensagem: "["+numeroTransacao+"] Venda registrada com sucesso: " + produto + ", " + quantidade + " unidades, R$" + preco + " por unidade, em " + data,
+            ehSucesso: true
+          } 
         } else {
-          return "Problemas na quantidade produtos no estoque!";
+          return {
+            mensagem: "Problemas na quantidade produtos no estoque!",
+            ehSucesso: false
+          }
         }        
       } else {
-        return "Problemas na validação do preço unitário!";
+        return {
+          mensagem: "Problemas na validação do preço unitário!",
+          ehSucesso: false
+        }
       }
     } else {
-      return "Problemas na validação da quantidade produtos!";
+      return {
+        mensagem: "Problemas na validação da quantidade produtos!",
+        ehSucesso: false
+      }
     }
   } else {
-    return "Problemas na validação dos campos obrigatórios!";
+    return {
+      mensagem: "Problemas na validação dos campos obrigatórios!",
+      ehSucesso: false
+    } 
   }
 }
 
@@ -102,7 +128,7 @@ function vender(){
   const quantidade = document.getElementById("quantidade").value;
   const preco = document.getElementById("preco").value;
 
-  let mensagem = registrarVenda(produto, quantidade, preco);
+  let resultado = registrarVenda(produto, quantidade, preco);
 
-  registrarHistorico(mensagem);
+  registrarHistorico(resultado.mensagem, resultado.ehSucesso);
 }
